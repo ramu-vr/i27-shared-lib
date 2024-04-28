@@ -15,36 +15,7 @@ def call(Map pipelineParams) {
             maven 'Maven-3.9.6'
             jdk 'JDK-17'
         }
-        parameters {
-            choice(name: 'sonarScans',
-                choices: 'no\nyes',
-                description: 'This will scan the applicaiton using sonar'
-            )
-            choice(name: 'buildOnly',
-                choices: 'no\nyes',
-                description: 'This will only build the application'
-            )
-            choice(name: 'dockerPush',
-                choices: 'no\nyes',
-                description: "This will trigger the build, docker build and docker push"
-            )
-            choice(name: 'deployToDev',
-                choices: 'no\nyes',
-                description: "This will Deploy my app to Dev env"
-            )
-            choice(name: 'deployToTest',
-                choices: 'no\nyes',
-                description: "This will Deploy my app to Test env"
-            )
-            choice(name: 'deployToStage',
-                choices: 'no\nyes',
-                description: "This will Deploy my app to Stage env"
-            )
-            choice(name: 'deployToProd',
-                choices: 'no\nyes',
-                description: "This will Deploy my app to Prod env"
-            )
-        }
+        
         environment {
             APPLICATION_NAME = "${pipelineParams.appName}"
             CLUSTER_NAME = "i27"
