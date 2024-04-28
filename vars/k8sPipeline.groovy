@@ -9,10 +9,10 @@ def call(Map pipelineParams) {
     K8s k8s = new K8s(this)
         pipeline {
         agent {
-            label 'k8s-slave'
+            label 'JENKINS-SLAVE'
         } 
         tools {
-            maven 'Maven-3.8.8'
+            maven 'Maven-3.9.6'
             jdk 'JDK-17'
         }
         parameters {
