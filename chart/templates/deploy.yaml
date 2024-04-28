@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment 
+metadata: 
+  name: {{ .Values.name }}
+  labels:
+    name: {{ .Values.name }}
+spec:
+  replicas: {{ .Values.replicas.default }}
+  selector:
+    matchLabels:
+      name: {{ .Values.fullname }}
+  template:
+    metadata:
+      labels:
+        name: {{ .Values.fullname }}
+    spec:
+      imagePullSecrets:
+      - name: private-jfrog-registry
+      containers:
+        - name: {{ .Values.name }}
+          image: "{{ .Values.image.name}}:{{ .Values.image.tag}}"
