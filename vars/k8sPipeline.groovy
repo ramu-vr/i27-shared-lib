@@ -66,7 +66,7 @@ def call(Map pipelineParams) {
         stages {
             stage('Authenticate to AWS Cloud') {
                 steps {
-                    echo "Executing in AWS Cloud auth Stage"
+                     sh "echo "Executing in AWS Cloud auth Stage""
                     script {
                         k8s.auth_login("${env.CLUSTER_NAME}", "${env.REGION}", "${env.ROLE_ARN}")
                         //k8s.auth_login("cart-cluster", "us-central1-a", "practical-brace-402514")
@@ -89,7 +89,7 @@ def call(Map pipelineParams) {
                 steps {
                     script {
                         //buildApp().call()
-                        echo "****** Printing Addition Mehthod*******"
+                        sh"echo "****** Printing Addition Mehthod*******""
                         println docker.add(3,4)
                         docker.buildApp("${env.APPLICATION_NAME}")
                     }
@@ -106,7 +106,7 @@ def call(Map pipelineParams) {
                     }
                 }
                 steps {
-                    echo "Performing Unit Tests for ${env.APPLICATION_NAME} application"
+                    sh"echo "Performing Unit Tests for ${env.APPLICATION_NAME} application""
                     sh "mvn test"
                 }
             }
@@ -121,7 +121,7 @@ def call(Map pipelineParams) {
                     }
                 }
                 steps {
-                    echo "Starting SonarScan with quality gate"
+                     sh"echo "Starting SonarScan with quality gate""
                     withSonarQubeEnv('SonarQube') {
                         sh """
                             mvn clean verify sonar:sonar \
@@ -199,7 +199,7 @@ def call(Map pipelineParams) {
 def dockerDeploy(envDeploy, hostPort, contPort){    
     return {
         echo "******************** Deploying to $envDeploy Environment ********************"
-        withCredentials([usernamePassword(credentialsId: 'maha_docker_vm_creds', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
+        withCredentials([usernamePassword(credentialsId: 'ramu_docker_creds', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
             // some block
             // with this creddentials, i need to connect to dev environment 
             // sshpass
@@ -207,12 +207,12 @@ def dockerDeploy(envDeploy, hostPort, contPort){
                 // Test to Pull the container on the docker server
                 sh "sshpass -p '$PASSWORD' -v ssh -o StrictHostKeyChecking=no $USERNAME@$docker_server_ip \"docker pull ${env.DOCKER_HUB}/${env.DOCKER_REPO}:$GIT_COMMIT\""
                 //sh "sshpass -p '$PASSWORD' -v ssh -o StrictHostKeyChecking=no $USERNAME@$docker_server_ip \"***"
-                echo "Stop the Container"
+                 sh "echo "Stop the Container""
                 // If we execute the below command it will fail for the first time,, as continers are not availble, stop/remove will cause a issue.
                 // we can implement try catch block.
                 try {
                     sh "sshpass -p '$PASSWORD' -v ssh -o StrictHostKeyChecking=no $USERNAME@$docker_server_ip \"docker stop ${env.APPLICATION_NAME}-$envDeploy\""
-                    echo "Removing the Container"
+                    sh"echo "Removing the Container""
                     sh "sshpass -p '$PASSWORD' -v ssh -o StrictHostKeyChecking=no $USERNAME@$docker_server_ip \"docker rm ${env.APPLICATION_NAME}-$envDeploy\""
                 } catch(err) {
                     echo "Caught the error: $err"
@@ -247,14 +247,14 @@ def dockerBuildandPush() {
     return {
         
         sh "cp ${workspace}/target/i27-${env.APPLICATION_NAME}-${env.POM_VERSION}.${env.POM_PACKAGING} ./.cicd"
-        echo "listing files in .cicd folder"
+         sh "echo "listing files in .cicd folder""
         sh "ls -la ./.cicd"
-        echo "******************** Building Docker Image ********************"
+        sh"echo "******************** Building Docker Image ********************""
         
         sh "docker build --force-rm --no-cache --pull --rm=true --build-arg JAR_SOURCE=i27-${env.APPLICATION_NAME}-${env.POM_VERSION}.${env.POM_PACKAGING} --build-arg JAR_DEST=i27-${env.APPLICATION_NAME}-${currentBuild.number}-${BRANCH_NAME}.${env.POM_PACKAGING} \
             -t ${env.DOCKER_HUB}/${env.DOCKER_REPO}:${env.DOCKER_IMAGE_TAG} ./.cicd"
         
-        echo "******************** Logging to Docker Registry ********************"
+        sh"echo "******************** Logging to Docker Registry ********************""
         sh "docker login -u ${DOCKER_CREDS_USR} -p ${DOCKER_CREDS_PSW}"
         sh "docker push ${env.DOCKER_HUB}/${env.DOCKER_REPO}:${env.DOCKER_IMAGE_TAG}"
     }
