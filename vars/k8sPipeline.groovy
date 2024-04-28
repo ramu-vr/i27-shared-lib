@@ -47,30 +47,28 @@ def call(Map pipelineParams) {
         }
         environment {
             APPLICATION_NAME = "${pipelineParams.appName}"
-            GKE_CLUSTER_NAME = "cart-cluster"
-            GKE_DEV_CLUSTER_NAME = "dev-cluster"
-            GKE_TST_CLUSTER_NAME = "tst-cluster"
-            GKE_ZONE = "us-central1-a"
-            GKE_PROJECT  = "practical-brace-402514"
+            CLUSTER_NAME = "i27"
+            REGION = "ap-south-1"
+            ROLE_ARN = "arn:aws:iam::533267231414:role/eks"
             //APPLICATION_NAME = "eureka"
-            SONAR_URL = "http://54.196.85.126:9000"
+            SONAR_URL = "http://http://13.126.225.26:9000/:9000"
             // SONAR_TOKEN = "sqa_6c69015b0cd422333397142a660072ec1f4f7fca"
-            SONAR_TOKEN = credentials('sonar_creds')
+            SONAR_TOKEN = credentials('jenkins')
             POM_VERSION = readMavenPom().getVersion()
             POM_PACKAGING = readMavenPom().getPackaging()
-            DOCKER_HUB = "docker.io/devopswithcloudhub"
+            DOCKER_HUB = "docker.io/vramu2609"
             DOCKER_REPO = "i27eurekaproject"
-            USER_NAME = "devopswithcloudhub" // UserID for Dockerhub
-            DOCKER_CREDS = credentials('dockerhub_creds')
+            USER_NAME = "vramu2609" // UserID for Dockerhub
+            DOCKER_CREDS = credentials('DOCKER_CREDS')
             DOCKER_IMAGE_TAG = sh(script: 'git log -1 --pretty=%h', returnStdout: true).trim()
             K8S_DEV_FILE = "k8s_dev.yaml"
         }
         stages {
-            stage('Authenticate to Google Cloud') {
+            stage('Authenticate to AWS Cloud') {
                 steps {
-                    echo "Executing in Google Cloud auth Stage"
+                    echo "Executing in AWS Cloud auth Stage"
                     script {
-                        k8s.auth_login("${env.GKE_CLUSTER_NAME}", "${env.GKE_ZONE}", "${env.GKE_PROJECT}")
+                        k8s.auth_login("${env.CLUSTER_NAME}", "${env.REGION}", "${env.ROLE_ARN}")
                         //k8s.auth_login("cart-cluster", "us-central1-a", "practical-brace-402514")
                         //k8s.auth_login def auth_login(gke_cluster_name, gke_zone, gke_project){
                     }
@@ -177,63 +175,7 @@ def call(Map pipelineParams) {
                 }
                 }
             }
-            stage ('Deploy to Test') { //6761
-                when {
-                    anyOf {
-                        expression {
-                            params.deployToTest == 'yes'
-                        }
-                    }
-                }
-                steps {
-                script {
-                    imageValidation().call()
-                    dockerDeploy('test', '6761', '8761').call()
-
-                }
-                }
-            }
-            stage ('Deploy to Stage') { //6761
-                when {
-                    anyOf {
-                        expression {
-                            params.deployToStage == 'yes'
-                        }
-                    }
-                }
-                steps {
-                script {
-                    imageValidation().call()
-                    dockerDeploy('stage', '7761', '8761').call()
-                }
-                }
-            }
-            stage ('Deploy to Prod') { //6761
-                when {
-                    allOf {
-                        anyOf {
-                            expression {
-                                params.deployToProd == 'yes'
-                            }
-                        }
-                        anyOf {
-                            branch 'release/*'
-                            // to deploy only tags to prod
-                            
-                        }
-                    }
-
-                }
-                steps {
-                    timeout(time: 200, unit: 'SECONDS') {
-                    input message: "Deploy to ${env.APPLICATION_NAME} ?? ", ok: 'yes', submitter: 'krish'
-                    }
-                script {
-                    imageValidation().call()
-                    dockerDeploy('prod', '8761', '8761').call()
-                }
-                }
-            }
+            
             stage ('Clean') {
                 steps {
                     cleanWs()
