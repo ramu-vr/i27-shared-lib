@@ -66,7 +66,7 @@ def call(Map pipelineParams) {
         stages {
             stage('Authenticate to AWS Cloud') {
                 steps {
-                    sh " echo "Executing in AWS Cloud auth Stage" "
+                   
                     script {
                         k8s.auth_login("${env.CLUSTER_NAME}", "${env.REGION}", "${env.ROLE_ARN}")
                         //k8s.auth_login("cart-cluster", "us-central1-a", "practical-brace-402514")
