@@ -8,6 +8,7 @@ class K8s {
 
     def auth_login(clusterName, region, roleARN) {
     jenkins.sh """#!/bin/bash
+    su -
     echo "Entering Auth Method for EKS Login"
     aws eks --region ${region} update-kubeconfig --name ${clusterName} --role-arn ${roleARN}
     kubectl get nodes
