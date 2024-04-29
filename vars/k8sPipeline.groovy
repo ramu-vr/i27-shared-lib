@@ -67,13 +67,7 @@ def call(Map pipelineParams) {
                 }
         }
         stage ('Deploy to Dev') { //5761
-                when {
-                    anyOf {
-                        expression {
-                            params.deployToDev == 'yes'
-                        }
-                    }
-                }
+               
                 steps {
                 script {
                     imageValidation().call()
