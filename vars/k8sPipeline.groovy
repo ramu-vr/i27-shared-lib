@@ -39,7 +39,8 @@ def call(Map pipelineParams) {
                 steps {
                     echo "Executing in aws Cloud auth Stage"
                     script {
-                       k8s.auth_login("${env.CLUSTER_NAME}", "${env.REGION}", "${env.ROLE_ARN}") 
+                       kubectl config use-context ramu@i27-cloth.ap-south-1.eksctl.io
+                       kubectl get nodes
                     }
                 }
             }
