@@ -66,6 +66,30 @@ def call(Map pipelineParams) {
                     }
                 }
         }
+        stage ('Deploy to Dev') { //5761
+                when {
+                    anyOf {
+                        expression {
+                            params.deployToDev == 'yes'
+                        }
+                    }
+                }
+                steps {
+                script {
+                    imageValidation().call()
+                    // docker.io/devopswithcloudhub/i27eureka:tagname
+                    def docker_image = "${env.DOCKER_HUB}/${env.DOCKER_REPO}:${env.DOCKER_IMAGE_TAG}"
+                    k8s.k8sdeploy("${env.K8S_DEV_FILE}", docker_image)
+                    // The below line is for Deployment using Docker
+                    //dockerDeploy('dev', '5761', '8761').call()
+                    // Kubernetes Deployment
+                    //k8s.auth_login("${env.GKE_CLUSTER_NAME}", "${env.GKE_ZONE}", "${env.GKE_PROJECT}")
+                    //k8s.deploy()
+                    //sh "rm -rf ~/.kube/config"
+
+                }
+                }
+            }
       } 
         }
 }
@@ -83,5 +107,21 @@ def dockerBuildandPush() {
         echo "******************** Logging to Docker Registry ********************"
         sh "docker login -u ${DOCKER_CREDS_USR} -p ${DOCKER_CREDS_PSW}"
         sh "docker push ${env.DOCKER_HUB}/${env.DOCKER_REPO}:${env.DOCKER_IMAGE_TAG}"
+    }
+}
+def imageValidation() {
+    return {
+        println("Pulling the Docker image")
+        try {
+            sh "docker pull ${env.DOCKER_HUB}/${env.DOCKER_REPO}:${env.DOCKER_IMAGE_TAG}"
+            println ("Pull Success,!!! Deploying !!!!!") 
+        }
+        catch (Exception e) {
+            println("OOPS, Docker image with this tag is not available")
+            println("So, Building the app, creating the image and pushing to registry")
+            //buildApp().call()
+            docker.buildApp("${env.APPLICATION_NAME}")
+            dockerBuildandPush().call()
+        }
     }
 }
