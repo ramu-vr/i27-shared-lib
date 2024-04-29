@@ -22,7 +22,7 @@ def call(Map pipelineParams) {
             REGION = "ap-south-1"
             ROLE_ARN = "arn:aws:iam::533267231414:role/eks-cloth"
             //APPLICATION_NAME = "eureka"
-            SONAR_URL = "http:/13.234.115.135:9000"
+            SONAR_URL = "http://13.234.115.135:9000"
             // SONAR_TOKEN = "sqa_6c69015b0cd422333397142a660072ec1f4f7fca"
             SONAR_TOKEN = credentials('jenkins')
             POM_VERSION = readMavenPom().getVersion()
@@ -59,23 +59,29 @@ def call(Map pipelineParams) {
                     sh "mvn test"
               }
         }
-         stage ('sonar') {
-                
-                steps {
-                    echo "Starting SonarScan with quality gate"
-                    withSonarQubeEnv('SonarQube') {
-                        sh """
-                            mvn clean verify sonar:sonar \
-                            -Dsonar.projectKey=jenkins \
-                            -Dsonar.projectName='i27-eureka' \
-                            -Dsonar.host.url=http://13.234.115.135:9000 \
-                            -Dsonar.token=sqa_fe0ff6a332da80d2c242f98103c50250bef55219
-
-                        """
+        stage ('Docker Build and Push') {
+             steps {
+                    script  {
+                        dockerBuildandPush().call()
                     }
-                    
                 }
-            }
+        }
       } 
         }
+}
+def dockerBuildandPush() {
+    return {
+        
+        sh "cp ${workspace}/target/i27-${env.APPLICATION_NAME}-${env.POM_VERSION}.${env.POM_PACKAGING} ./.cicd"
+        echo "listing files in .cicd folder"
+        sh "ls -la ./.cicd"
+        echo "******************** Building Docker Image ********************"
+        
+        sh "docker build --force-rm --no-cache --pull --rm=true --build-arg JAR_SOURCE=i27-${env.APPLICATION_NAME}-${env.POM_VERSION}.${env.POM_PACKAGING} --build-arg JAR_DEST=i27-${env.APPLICATION_NAME}-${currentBuild.number}-${BRANCH_NAME}.${env.POM_PACKAGING} \
+            -t ${env.DOCKER_HUB}/${env.DOCKER_REPO}:${env.DOCKER_IMAGE_TAG} ./.cicd"
+        
+        echo "******************** Logging to Docker Registry ********************"
+        sh "docker login -u ${DOCKER_CREDS_USR} -p ${DOCKER_CREDS_PSW}"
+        sh "docker push ${env.DOCKER_HUB}/${env.DOCKER_REPO}:${env.DOCKER_IMAGE_TAG}"
+    }
 }
