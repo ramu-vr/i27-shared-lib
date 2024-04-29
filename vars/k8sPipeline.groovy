@@ -37,11 +37,8 @@ def call(Map pipelineParams) {
       stages {
         stage('Authenticate to aws Cloud') {
                 steps {
-                    echo "Executing in aws Cloud auth Stage"
-                    script {
-                       
-                       kubectl get nodes
-                    }
+                   sh "kubectl get nodes"
+                   
                 }
             }
 
