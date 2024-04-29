@@ -66,9 +66,11 @@ def call(Map pipelineParams) {
                     withSonarQubeEnv('SonarQube') {
                         sh """
                             mvn clean verify sonar:sonar \
-                                -Dsonar.projectKey=i27-${env.APPLICATION_NAME} \
-                                -Dsonar.host.url=${env.SONAR_URL} \
-                                -Dsonar.login=${env.SONAR_TOKEN}
+                            -Dsonar.projectKey=jenkins \
+                            -Dsonar.projectName='i27-eureka' \
+                            -Dsonar.host.url=http://13.234.115.135:9000 \
+                            -Dsonar.token=sqa_fe0ff6a332da80d2c242f98103c50250bef55219
+
                         """
                     }
                     
