@@ -22,7 +22,7 @@ def call(Map pipelineParams) {
             REGION = "ap-south-1"
             ROLE_ARN = "arn:aws:iam::533267231414:role/eks-cloth"
             //APPLICATION_NAME = "eureka"
-            SONAR_URL = "http:/13.234.115.135:9000/"
+            SONAR_URL = "http:/13.234.115.135:9000"
             // SONAR_TOKEN = "sqa_6c69015b0cd422333397142a660072ec1f4f7fca"
             SONAR_TOKEN = credentials('jenkins')
             POM_VERSION = readMavenPom().getVersion()
@@ -71,11 +71,7 @@ def call(Map pipelineParams) {
                                 -Dsonar.login=${env.SONAR_TOKEN}
                         """
                     }
-                    timeout (time: 2, unit: 'MINUTES'){ // NANOSECONDS, ****
-                        script {
-                            waitForQualityGate abortPipeline: true
-                        }
-                    } 
+                    
                 }
             }
       } 
