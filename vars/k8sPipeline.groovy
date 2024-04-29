@@ -41,8 +41,25 @@ def call(Map pipelineParams) {
                    
                 }
             }
+        stage('Build'){
+            steps {
+                    script {
+                        //buildApp().call()
+                        echo "****** Printing Addition Mehthod*******"
+                        
+                        docker.buildApp("${env.APPLICATION_NAME}")
+                    }
 
- 
+                }
+        }     
+        stage('Unit Tests'){
+
+        steps {
+                    echo "Performing Unit Tests for ${env.APPLICATION_NAME} application"
+                    sh "mvn test"
+              }
+        }
+        
       } 
         }
 }
