@@ -18,11 +18,11 @@ def call(Map pipelineParams) {
         
         environment {
             APPLICATION_NAME = "${pipelineParams.appName}"
-            CLUSTER_NAME = "i27"
+            CLUSTER_NAME = "i27-cloth"
             REGION = "ap-south-1"
-            ROLE_ARN = "arn:aws:iam::533267231414:role/eks"
+            ROLE_ARN = "arn:aws:iam::533267231414:role/eks-cloth"
             //APPLICATION_NAME = "eureka"
-            SONAR_URL = "http://http://13.126.225.26:9000/:9000"
+            SONAR_URL = "http://http:/13.234.115.135/:9000/:9000"
             // SONAR_TOKEN = "sqa_6c69015b0cd422333397142a660072ec1f4f7fca"
             SONAR_TOKEN = credentials('jenkins')
             POM_VERSION = readMavenPom().getVersion()
