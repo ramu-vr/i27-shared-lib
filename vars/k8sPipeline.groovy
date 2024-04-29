@@ -39,7 +39,7 @@ def call(Map pipelineParams) {
                 steps {
                     echo "Executing in aws Cloud auth Stage"
                     script {
-                       kubectl config use-context ramu@i27-cloth.ap-south-1.eksctl.io
+                       kubectl config use-context 'ramu@i27-cloth.ap-south-1.eksctl.io'
                        kubectl get nodes
                     }
                 }
